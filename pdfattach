@@ -1,0 +1,26 @@
+function sendReport() {
+    let token = ScriptApp.getOAuthToken();
+    let spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+    spreadsheet.getSheetByName("Data").hideSheet();
+    let spreadsheetId = spreadsheet.getId();
+    let sheetId = spreadsheet.getSheetByName("Sheet2").getSheetId();
+    let sheetUrl = "https://docs.google.com/spreadsheets/d/" + spreadsheetId + "/export?" + "format=xlsx" + "&gid=" + sheetId + "&portrait=true" + "&exportFormat=pdf";
+    let request = UrlFetchApp.fetch(sheetUrl, {
+        headers: {
+            'Authorization': 'Bearer ' + token
+        }
+    });
+    let content = request.getContent();
+    let message = {
+        to: "youremail@example.com",
+        subject: "Monthly sales report",
+        body: "Hi team,\n\nPlease find the monthly report attached.\n\nThank you,\nBob",
+        attachments: [{
+            fileName: "Monthly sales report.pdf",
+            content: content,
+            mimeType: "application/pdf"
+        }]
+    }
+    MailApp.sendEmail(message);
+    spreadsheet.getSheetByName("Data").activate();
+}
