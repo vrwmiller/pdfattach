@@ -1,0 +1,32 @@
+function processStatements() {
+  var spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = spreadsheet.getActiveSheet();
+  var lastRow = sheet.getLastRow();
+
+  // Month name
+  var currentDate = new Date();
+  var monthNames = ["January", "February", "March", "April", "May", "June",
+                    "July", "August", "September", "October", "November", "Decemeber"];
+  var currentMonth = monthNames[currentDate.getMonth()];
+  var currentYear = currentDate.getFullYear();
+  
+  for (var i = 2; i <= lastRow; i++) { // Assuming data starts from row 1
+    var rowData = sheet.getRange(i, 1, 1, 4).getValues()[0];
+    var account = rowData[0];
+    var emailAddresses = rowData[1]; // Assuming email addresses are separated by commas
+    var sheetId = rowData[2];
+    var shouldProcess = rowData[3];
+    
+    if (shouldProcess == true) {
+      var sheetFile = DriveApp.getFileById(sheetId);
+      var pdfBlob = sheetFile.getAs('application/pdf');
+      
+      MailApp.sendEmail({
+        to: emailAddresses,
+        subject: 'Statement for ' + currentMonth + ' ' + currentYear,
+        body: 'Hello and good day! Please see the attached statement for this month.',
+        attachments: [pdfBlob]
+      });
+    }
+  }
+}
