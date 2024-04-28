@@ -1,0 +1,27 @@
+function updateStockPrices() {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  // Adjust the range to column M for tickers (Assuming data starts from row 2)
+  const tickersRange = sheet.getRange("M2:M");
+  const tickers = tickersRange.getValues().filter(String); // Removes empty cells
+
+  const apiKey = 'YOUR_ALPHA_VANTAGE_API_KEY'; // Replace with your actual API key
+  const urlBase = 'https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=';
+
+  tickers.forEach((row, index) => {
+    const ticker = row[0];
+    const url = `${urlBase}${ticker}&apikey=${apiKey}`;
+    const response = UrlFetchApp.fetch(url, {muteHttpExceptions: true});
+    const json = JSON.parse(response.getContentText());
+    
+    if (json["Global Quote"] && json["Global Quote"]["05. price"]) {
+      const price = json["Global Quote"]["05. price"];
+      // Update the price in column T, which is 20th column of the spreadsheet
+      sheet.getRange(index + 2, 20).setValue(price); // Assumes prices start on row 2 in column T
+    } else {
+      // Optionally handle errors or log them
+      console.error("Failed to fetch price for ticker:", ticker);
+    }
+  });
+  
+  SpreadsheetApp.flush(); // Apply changes
+}
