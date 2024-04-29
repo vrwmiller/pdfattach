@@ -35,7 +35,7 @@ function processStatements() {
       
         MailApp.sendEmail({
           to: emailAddresses,
-          cc: 'vrwmiller@gmail.com',
+          cc: 'emailaddress',
           subject: 'Statement for ' + currentMonth + ' ' + currentYear,
           body: 'Hello and good day! Please see the attached statement for this month.',
           attachments: [pdfBlob]
