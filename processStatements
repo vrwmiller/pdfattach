@@ -3,12 +3,17 @@ function processStatements() {
   var sheet = spreadsheet.getActiveSheet();
   var lastRow = sheet.getLastRow();
 
+  console.log("Processing statements...");
+
   // Month name
   var currentDate = new Date();
   var monthNames = ["January", "February", "March", "April", "May", "June",
                     "July", "August", "September", "October", "November", "Decemeber"];
   var currentMonth = monthNames[currentDate.getMonth()];
   var currentYear = currentDate.getFullYear();
+
+  console.log("Current month: " + currentMonth);
+  console.log("Current year: " + currentYear);
   
   for (var i = 2; i <= lastRow; i++) { // Assuming data starts from row 2
     var rowData = sheet.getRange(i, 1, 1, 4).getValues()[0];
@@ -16,17 +21,34 @@ function processStatements() {
     var emailAddresses = rowData[1];
     var sheetId = rowData[2];
     var shouldProcess = rowData[3];
+
+    console.log("Processing row " + i + "...");
+    console.log("Account: " + account);
+    console.log("Email Addresses: " + emailAddresses);
+    console.log("Sheet ID: " + sheetId);
+    console.log("Should Process: " + shouldProcess);
     
     if (shouldProcess == true) {
-      var sheetFile = DriveApp.getFileById(sheetId);
-      var pdfBlob = sheetFile.getAs('application/pdf');
+      try {
+        var sheetFile = DriveApp.getFileById(sheetId);
+        var pdfBlob = sheetFile.getAs('application/pdf');
       
-      MailApp.sendEmail({
-        to: emailAddresses,
-        subject: 'Statement for ' + currentMonth + ' ' + currentYear,
-        body: 'Hello and good day! Please see the attached statement for this month.',
-        attachments: [pdfBlob]
-      });
+        MailApp.sendEmail({
+          to: emailAddresses,
+          cc: 'vrwmiller@gmail.com',
+          subject: 'Statement for ' + currentMonth + ' ' + currentYear,
+          body: 'Hello and good day! Please see the attached statement for this month.',
+          attachments: [pdfBlob]
+        });
+
+        console.log("Email sent for row " + i);
+      } catch (error) {
+        console.error("Error sending email for row " + i + ":", error);
+      }
+    } else {
+      console.log("Skipping row " + i + " because shouldProcess is false");
     }
   }
+
+  console.log("Processing completed.");
 }
